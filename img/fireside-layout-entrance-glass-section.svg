@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 360" width="100%" style="max-width:760px;display:block;background:#faf8f4;border-radius:12px" role="img" aria-label="Section through the step showing the glass boundary with oak cap">
+<g font-family="-apple-system,Helvetica,Arial,sans-serif" font-size="12" fill="#2b2824">
+<text x="20" y="28" font-weight="600" font-size="14">Recommended: low glass with a white-oak cap (section through the step)</text>
+<rect x="20" y="262" width="352" height="12" fill="#e7ddcc"/>
+<text x="30" y="292" fill="#7a7166">lounge (lower) floor</text>
+<rect x="386" y="240" width="354" height="12" fill="#e7ddcc"/>
+<text x="560" y="230" fill="#7a7166">foyer (upper) floor · stays clear</text>
+<rect x="372" y="240" width="14" height="34" fill="#d8ccb8"/>
+<text x="394" y="272" fill="#9b6b3d">step, 19–25 cm (builder to verify)</text>
+<rect x="348" y="244" width="22" height="18" fill="#3a352f"/>
+<line x1="359" y1="264" x2="300" y2="318" stroke="#3a352f" stroke-width=".8"/>
+<text x="20" y="330" fill="#3a352f">surface base on the lounge floor, anchored by drilling through the tile</text>
+<rect x="356" y="106" width="6" height="140" fill="#bcd3da" opacity=".9"/>
+<rect x="344" y="94" width="30" height="14" rx="3" fill="#c8a67a"/>
+<text x="394" y="104" fill="#9b6b3d">white-oak cap, about 86 cm (34″) above the foyer floor</text>
+<path d="M374 110 L430 240" stroke="#f3c77a" stroke-width="10" opacity=".35"/>
+<text x="440" y="170" fill="#9b6b3d">warm LED in the cap lights the step edge</text>
+<line x1="730" y1="94" x2="730" y2="240" stroke="#7a7166"/><text x="722" y="150" fill="#7a7166" text-anchor="end">86 cm</text>
+<rect x="150" y="188" width="180" height="74" rx="18" fill="#fffdf9" stroke="#3a352f"/>
+<text x="240" y="229" text-anchor="middle">sofa, back about 65–72 cm</text>
+<text x="80" y="60" fill="#7a7166">fire →  (west)</text><text x="600" y="60" fill="#7a7166">front door (east)</text>
+</g></svg>
