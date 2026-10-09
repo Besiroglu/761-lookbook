@@ -26,3 +26,11 @@
 
 /* Keep the complete navigation visible on narrow phones. */
 @media(max-width:540px){.site-header{height:auto;min-height:70px;flex-wrap:wrap;gap:8px;padding:14px 16px}.site-header .site-nav{width:100%;min-width:0;flex-wrap:wrap;gap:2px}.site-header .guide-menu{margin:0;border:0;padding:0}}
+
+/* Shipping status (owner request 8 Oct 2026): a line on purchased cards and a column in Every purchase. */
+.ship-line{font-size:12px;line-height:1.5;margin:-7px 0 15px;color:var(--ink)}.ship-label{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--clay);margin-bottom:2px}
+.ship-line:before,.ledger .ship-text:before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;margin:0 7px 1px 0;background:var(--muted);vertical-align:middle}
+.ship-line.ship-delivered:before,.ledger .ship-delivered .ship-text:before{background:var(--olive)}.ship-line.ship-in_transit:before,.ledger .ship-in_transit .ship-text:before{background:#6f8fae}
+.ship-line.ship-not_shipped:before,.ship-line.ship-partly:before,.ledger .ship-not_shipped .ship-text:before,.ledger .ship-partly .ship-text:before{background:var(--clay)}
+.ship-line.ship-unknown:before,.ledger .ship-unknown .ship-text:before,.ledger .ship-duplicate .ship-text:before{background:#9a6b3a}.ledger .ship-service .ship-text:before,.ledger .ship-charge .ship-text:before{background:var(--line)}
+.ledger td.ship{min-width:230px;color:var(--ink)}.ship-more summary{cursor:pointer;color:var(--olive);margin-top:4px;font-size:12px}.ship-more ul{margin:6px 0 0 16px;padding:0}.ship-more li{margin:0 0 9px;font-size:12.5px}.ship-meta,.ship-basis,.ship-src{font-size:12px;color:var(--muted)}.ship-note{font-size:12px;margin:6px 0 0;color:var(--muted)}
