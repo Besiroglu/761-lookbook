@@ -36,8 +36,23 @@ function matches(p,f,items){
  const hay=normalize([p.name,p.maker,p.category,p.group,p.search].join(' '));
  return normalize(f.q).trim().split(/\s+/).filter(Boolean).every(t=>hay.includes(t));
 }
-function sortProducts(products,sort){
- return [...products].sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='maker'?a.maker.localeCompare(b.maker)||a.name.localeCompare(b.name):sort==='recent'?((b.purchasedAt||'').localeCompare(a.purchasedAt||'')||a.name.localeCompare(b.name)):a.rank-b.rank||Number(b.priority)-Number(a.priority));
+// "Most recent purchase", the Purchased view's order (owner request 8 Oct 2026: the newest purchase always first).
+// A product's purchase date is its purchasedAt, else purchase.date, else the date of the spend-ledger row whose order
+// number appears in its purchase record, delivery status or price line, else when it was marked purchased in this
+// browser. Same-day purchases follow the ledger (a later row was bought later), then product name.
+const orderTokens=s=>String(s||'').split(/[^A-Za-z0-9-]+/).filter(t=>t.length>=4&&/\d/.test(t)&&!/^(19|20)\d\d$/.test(t)).map(t=>t.toLowerCase());
+function purchaseInfo(products,items,ledger){
+ items=items||{};ledger=ledger||[];
+ const first=new Map();ledger.forEach((e,i)=>{for(const t of orderTokens(e.order))if(!first.has(t))first.set(t,i)});
+ return new Map(products.map(p=>{
+  let row=-1;for(const t of orderTokens([p.purchase&&p.purchase.order,p.soonest&&p.soonest.status,p.price].join(' '))){const i=first.get(t);if(i!==undefined&&(row<0||i<row))row=i}
+  const s=items[p.id]||{};
+  return [p.id,{date:String(p.purchasedAt||(p.purchase&&p.purchase.date)||(row>=0&&ledger[row].date)||(s.purchased===true&&(s.purchasedAt||s.updatedAt))||''),row}];
+ }));
+}
+function sortProducts(products,sort,{items,ledger}={}){
+ const info=sort==='recent'?purchaseInfo(products,items,ledger):null, P=id=>info.get(id);
+ return [...products].sort((a,b)=>sort==='name'?a.name.localeCompare(b.name):sort==='maker'?a.maker.localeCompare(b.maker)||a.name.localeCompare(b.name):sort==='recent'?(P(b.id).date.localeCompare(P(a.id).date)||P(b.id).row-P(a.id).row||a.name.localeCompare(b.name)):a.rank-b.rank||Number(b.priority)-Number(a.priority));
 }
 function importItems(products,payload,existing){
  const items={...existing};let count=0;
@@ -48,6 +63,6 @@ function importItems(products,payload,existing){
  }
  return {items,count};
 }
-const api={stateFor,migrate,inView,normalize,matches,sortProducts,importItems};
+const api={stateFor,migrate,inView,normalize,matches,sortProducts,purchaseInfo,importItems};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.BoardCore=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

@@ -27,6 +27,8 @@ function navigate(changes,{replace=false}={}){
  if(filters.category)openGroups.add(categoryMap.get(filters.category).group);if(filters.group)openGroups.add(filters.group);
  $('search').value=filters.q;$('mobile-view').value=filters.view;$('sort').value=filters.sort;render();
 }
+// Purchased always opens newest purchase first; leaving it drops that sort for the other views.
+function viewChange(view){return {view,category:'',group:'',q:'',sort:view==='purchased'?'recent':filters.sort==='recent'?'suggested':filters.sort}}
 function countFor(view,group='',category=''){return products.filter(p=>C.matches(p,{...filters,view,group,category},saved.items)).length}
 function navHTML(includeViews=true){
  let out=includeViews?'<p class="side-label">Your board</p><div class="view-list">'+Object.entries(viewNames).map(([id,n])=>'<button class="view-button '+(filters.view===id?'active':'')+'" data-action="view" data-value="'+id+'" aria-pressed="'+(filters.view===id)+'">'+icon(id)+'<span>'+n+'</span><span class="nav-count">'+products.filter(p=>C.inView(p,saved.items,id)).length+'</span></button>').join('')+'</div>':'';
@@ -58,7 +60,7 @@ function ledgerHTML(){const L=(catalog.ledger||[]).map((e,i)=>[e,i]).sort((a,b)=
 function render(){
  const opened=[...$('product-grid').querySelectorAll('.product-details[open]')].map(d=>d.closest('[data-id]').dataset.id);
  const focus=document.activeElement;const focusKey=focus?.dataset.id, focusAction=focus?.dataset.action;
- const effSort=(filters.view==='purchased'&&filters.sort==='suggested')?'recent':filters.sort;const result=C.sortProducts(products.filter(p=>C.matches(p,filters,saved.items)),effSort);
+ const effSort=(filters.view==='purchased'&&filters.sort==='suggested')?'recent':filters.sort;const result=C.sortProducts(products.filter(p=>C.matches(p,filters,saved.items)),effSort,{items:saved.items,ledger:catalog.ledger||[]});
  $('board-nav').innerHTML=navHTML();if($('category-dialog').open)$('drawer-nav').innerHTML=navHTML(false);
  $('page-title').textContent=title();document.title=title()+' · 761 University';
  $('page-description').textContent=(filters.category||filters.group)?(filters.view==='all'?'All the options and favourites, together.':viewNames[filters.view]+' in this category.'):{all:'One place for every piece, from furniture to everyday essentials.',review:'The pieces you have yet to review.',favourites:'Everything you have hearted, including the former Product ideas collection.',purchased:'Products on this board marked as purchased.',hidden:'The pieces you have set aside. Restore any you want to reconsider.'}[filters.view];
@@ -84,12 +86,15 @@ function render(){
  if(focusKey&&focusAction){const replacement=$('product-grid').querySelector('button[data-id="'+focusKey+'"][data-action="'+focusAction+'"]');if(replacement)replacement.focus({preventScroll:true});}
 }
 function toast(message,undo=false){clearTimeout(toastTimer);$('toast').innerHTML=esc(message)+(undo?' <button data-action="undo" style="margin-left:12px;background:transparent;border:0;color:inherit;text-decoration:underline">Undo</button>':'');$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,undo?8000:5000)}
-function changeProduct(id,delta,message){const p=byId.get(id);if(!p)return;const previous=C.stateFor(p,saved.items);undoAction={id,previous};saved.items[id]={...previous,...delta,updatedAt:new Date().toISOString()};persist();render();toast(message,true)}
+function changeProduct(id,delta,message){const p=byId.get(id);if(!p)return;const was=saved.items[id]||{};const previous={...C.stateFor(p,saved.items),...(was.purchasedAt?{purchasedAt:was.purchasedAt}:{})};undoAction={id,previous};const next={...previous,...delta,updatedAt:new Date().toISOString()};
+ // Remember when a piece is marked purchased in this browser (local time), so Purchased lists it newest first.
+ if(next.purchased&&!previous.purchased){const d=new Date();next.purchasedAt=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16)}if(!next.purchased)delete next.purchasedAt;
+ saved.items[id]=next;persist();render();toast(message,true)}
 function closeCategories(){if($('category-dialog').open)$('category-dialog').close();}
 document.addEventListener('toggle',e=>{const d=e.target;if(d.matches('.category-group')){if(d.open)openGroups.add(d.dataset.group);else openGroups.delete(d.dataset.group)}},true);
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-action]');if(!b)return;const {action,value,id}=b.dataset;const p=byId.get(id),s=p&&C.stateFor(p,saved.items);
- if(action==='view'){navigate({view:value,category:'',group:'',q:''});closeCategories();}
+ if(action==='view'){navigate(viewChange(value));closeCategories();}
  if(action==='category'){navigate({category:value,group:'',...(categoryMap.get(value)?.group==='rooms'?{view:'all',q:''}:{})});closeCategories();}
  if(action==='room-section')document.getElementById(value)?.scrollIntoView({behavior:'auto',block:'start'});
  if(action==='group'){navigate({group:value,category:''});closeCategories();}
@@ -106,7 +111,7 @@ document.addEventListener('click',e=>{
 });
 $('search').addEventListener('input',()=>navigate({q:$('search').value},{replace:true}));
 $('sort').addEventListener('change',()=>navigate({sort:$('sort').value}));
-$('mobile-view').addEventListener('change',()=>navigate({view:$('mobile-view').value,category:'',group:'',q:''}));
+$('mobile-view').addEventListener('change',()=>navigate(viewChange($('mobile-view').value)));
 $('clear-filters').onclick=()=>navigate({view:'all',category:'',group:'',q:'',sort:'suggested'});
 $('load-more').onclick=()=>{limit+=30;render()};
 $('categories-open').onclick=()=>{$('drawer-nav').innerHTML=navHTML(false);$('category-dialog').showModal()};
