@@ -105,6 +105,8 @@ function changeProduct(id,delta,message){const p=byId.get(id);if(!p)return;const
 function closeCategories(){if($('category-dialog').open)$('category-dialog').close();}
 document.addEventListener('toggle',e=>{const d=e.target;if(d.matches('.category-group')){if(d.open)openGroups.add(d.dataset.group);else openGroups.delete(d.dataset.group)}},true);
 document.addEventListener('click',e=>{
+ const roomAnchor=e.target.closest('a[href^="#rp-"]');
+ if(roomAnchor&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&!e.altKey){const section=document.getElementById(roomAnchor.getAttribute('href').slice(1));if(section){e.preventDefault();section.scrollIntoView({behavior:'auto',block:'start'});return;}}
  const b=e.target.closest('[data-action]');if(!b)return;const {action,value,id}=b.dataset;const p=byId.get(id),s=p&&C.stateFor(p,saved.items);
  if(action==='view'){navigate(viewChange(value));closeCategories();}
  if(action==='category'){navigate({category:value,group:'',...(categoryMap.get(value)?.group==='rooms'?{view:'all',q:''}:{})});closeCategories();}
