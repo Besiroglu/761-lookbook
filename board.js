@@ -25,6 +25,10 @@ function route(){
  filters={view:params.get('view') in viewNames?params.get('view'):'all',category:categoryMap.has(params.get('category'))?params.get('category'):'',group:groupMap.has(params.get('group'))?params.get('group'):'',q:params.get('q')||'',sort:['name','maker','recent'].includes(params.get('sort'))?params.get('sort'):(params.get('view')==='purchased'?'recent':'suggested')};
  if(filters.category){filters.group='';openGroups.add(categoryMap.get(filters.category).group)}if(filters.group)openGroups.add(filters.group);limit=30;
  $('search').value=filters.q;$('sort').value=filters.sort;$('mobile-view').value=filters.view;render();
+ const section=params.get('section');
+ if(filters.category&&section&&section.startsWith('rp-')){
+  requestAnimationFrame(()=>document.getElementById(section)?.scrollIntoView({block:'start'}));
+ }
 }
 function navigate(changes,{replace=false}={}){
  filters={...filters,...changes};if(changes.category)filters.group='';if(changes.group)filters.category='';limit=30;
