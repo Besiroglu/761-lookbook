@@ -20,6 +20,14 @@ const migrated=C.migrate(products,readStorage(KEY),legacy);let saved=migrated.da
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(saved));storageOK=true}catch(e){storageOK=false}$('storage-notice').hidden=storageOK;}
 if(storageOK)persist();else $('storage-notice').hidden=false;
 let filters={view:'all',category:'',group:'',q:'',sort:'suggested'}, limit=30, openGroups=new Set(), toastTimer, undoAction;
+function revealRoomSection(id){
+ const node=document.getElementById(id);
+ if(!node)return;
+ for(let ancestor=node.parentElement;ancestor;ancestor=ancestor.parentElement){
+  if(ancestor.tagName==='DETAILS'&&!ancestor.open)ancestor.open=true;
+ }
+ node.scrollIntoView({behavior:'auto',block:'start'});
+}
 function route(){
  const hash=location.hash.slice(1), params=new URLSearchParams(hash.includes('=')?hash:hash?'category='+encodeURIComponent(hash):'');
  filters={view:params.get('view') in viewNames?params.get('view'):'all',category:categoryMap.has(params.get('category'))?params.get('category'):'',group:groupMap.has(params.get('group'))?params.get('group'):'',q:params.get('q')||'',sort:['name','maker','recent'].includes(params.get('sort'))?params.get('sort'):(params.get('view')==='purchased'?'recent':'suggested')};
@@ -27,7 +35,7 @@ function route(){
  $('search').value=filters.q;$('sort').value=filters.sort;$('mobile-view').value=filters.view;render();
  const section=params.get('section');
  if(filters.category&&section&&section.startsWith('rp-')){
-  requestAnimationFrame(()=>document.getElementById(section)?.scrollIntoView({block:'start'}));
+  requestAnimationFrame(()=>revealRoomSection(section));
  }
 }
 function navigate(changes,{replace=false}={}){
@@ -110,11 +118,11 @@ function closeCategories(){if($('category-dialog').open)$('category-dialog').clo
 document.addEventListener('toggle',e=>{const d=e.target;if(d.matches('.category-group')){if(d.open)openGroups.add(d.dataset.group);else openGroups.delete(d.dataset.group)}},true);
 document.addEventListener('click',e=>{
  const roomAnchor=e.target.closest('a[href^="#rp-"]');
- if(roomAnchor&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&!e.altKey){const section=document.getElementById(roomAnchor.getAttribute('href').slice(1));if(section){e.preventDefault();section.scrollIntoView({behavior:'auto',block:'start'});return;}}
+ if(roomAnchor&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&!e.altKey){const section=document.getElementById(roomAnchor.getAttribute('href').slice(1));if(section){e.preventDefault();revealRoomSection(section.id);return;}}
  const b=e.target.closest('[data-action]');if(!b)return;const {action,value,id}=b.dataset;const p=byId.get(id),s=p&&C.stateFor(p,saved.items);
  if(action==='view'){navigate(viewChange(value));closeCategories();}
  if(action==='category'){navigate({category:value,group:'',...(categoryMap.get(value)?.group==='rooms'?{view:'all',q:''}:{})});closeCategories();}
- if(action==='room-section')document.getElementById(value)?.scrollIntoView({behavior:'auto',block:'start'});
+ if(action==='room-section')revealRoomSection(value);
  if(action==='group'){navigate({group:value,category:''});closeCategories();}
  if(action==='latest-search'){navigate({category:b.dataset.category||'',group:'',view:'all',q:value,sort:'suggested'});}
  if(action==='latest'){navigate({category:value,group:'',view:'all',q:'',sort:'suggested'});}
